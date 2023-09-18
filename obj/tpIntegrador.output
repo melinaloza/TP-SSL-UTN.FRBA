@@ -1,0 +1,3837 @@
+Estado 186 conflictos: 1 desplazamiento(s)/reducción(ones)
+Estado 199 conflictos: 2 reducción(ones)/reducción(ones)
+
+
+Gramática
+
+    0 $accept: input $end
+
+    1 input: /* vacío */
+    2      | input line
+
+    3 line: declaracion '\n'
+    4     | sentencia '\n'
+    5     | error '\n'
+    6     | error ';'
+
+    7 expresion: expresionAsignacion
+    8          | expresion ',' expresionAsignacion
+
+    9 expresionAsignacion: expresionCondicional
+   10                    | expresionUnaria '=' expresionAsignacion
+   11                    | expresionUnaria OP_ASIGNACION expresionAsignacion
+
+   12 expresionCondicional: expresionOLogico
+   13                     | expresionOLogico '?' expresion ':' expresionCondicional
+
+   14 expresionOLogico: expresionYLogico
+   15                 | expresionOLogico OP_O_LOGICO expresionYLogico
+
+   16 expresionYLogico: expresionOInclusivo
+   17                 | expresionYLogico OP_Y_LOGICO expresionOInclusivo
+
+   18 expresionOInclusivo: expresionY
+   19                    | expresionOInclusivo OP_O_INCLUSIVO expresionY
+
+   20 expresionY: expresionIgualdad
+   21           | expresionY '&' expresionIgualdad
+
+   22 expresionIgualdad: expresionRelacional
+   23                  | expresionIgualdad OP_IGUALDAD expresionRelacional
+   24                  | expresionIgualdad OP_DESIGUALDAD expresionRelacional
+
+   25 expresionRelacional: expresionAditiva
+   26                    | expresionRelacional OP_RELACIONAL expresionAditiva
+
+   27 expresionAditiva: expresionMultiplicativa
+   28                 | expresionAditiva '+' expresionMultiplicativa
+   29                 | expresionAditiva '-' expresionMultiplicativa
+
+   30 expresionMultiplicativa: expresionConversion
+   31                        | expresionMultiplicativa '*' expresionConversion
+   32                        | expresionMultiplicativa OP_DIVISION expresionConversion
+   33                        | expresionMultiplicativa OP_PORCENTAJE expresionConversion
+
+   34 expresionConversion: expresionUnaria
+   35                    | '(' TIPO_DATO ')' expresionConversion
+
+   36 expresionUnaria: expresionSufijo
+   37                | OP_INCREMENTO expresionUnaria
+   38                | OP_DECREMENTO expresionUnaria
+   39                | operadorUnario expresionConversion
+   40                | SIZEOF expresionUnaria
+   41                | SIZEOF '(' TIPO_DATO ')'
+
+   42 operadorUnario: '&'
+   43               | '*'
+   44               | '+'
+   45               | '-'
+   46               | '!'
+
+   47 expresionSufijo: expresionPrimaria
+   48                | expresionSufijo '[' expresion ']'
+   49                | expresionSufijo '(' listaArgumentos_ ')'
+   50                | expresionSufijo OP_INCREMENTO
+
+   51 listaArgumentos: expresionAsignacion
+   52                | listaArgumentos ',' expresionAsignacion
+
+   53 expresionPrimaria: IDENTIFICADOR
+   54                  | constante
+   55                  | CTE_CADENA
+   56                  | '(' expresion ')'
+
+   57 expresionConstante: expresionCondicional
+
+   58 constante: CTE_DECIMAL
+   59          | CTE_OCTAL
+   60          | CTE_HEXADECIMAL
+   61          | CTE_REAL
+   62          | CTE_CARACTER
+
+   63 declaracion: declaracionVariable
+   64            | declaracionFuncion
+
+   65 declaracionVariable: TIPO_DATO declarador ';'
+
+   66 declarador: unaDeclaracion
+   67           | unaDeclaracion '=' inicializador
+   68           | unaDeclaracion ',' declarador
+
+   69 inicializador: expresionAsignacion
+   70              | '{' listaInicializadores '}'
+   71              | '{' listaInicializadores ',' listaInicializadores '}'
+
+   72 listaInicializadores: inicializador
+   73                     | listaInicializadores ',' inicializador
+
+   74 declaracionFuncion: TIPO_DATO IDENTIFICADOR '(' listaParametros_ ')' ';'
+   75                   | TIPO_DATO IDENTIFICADOR '(' listaParametros_ ')' sentenciaCompuesta
+
+   76 listaDeParametros: parametro
+   77                  | listaDeParametros ',' parametro
+
+   78 parametro: TIPO_DATO unaDeclaracion
+
+   79 unaDeclaracion: declaradorDirecto
+
+   80 declaradorDirecto: IDENTIFICADOR
+   81                  | declaradorDirecto '[' expresionConstante_ ']'
+
+   82 sentencia: sentenciaExpresion
+   83          | sentenciaCompuesta
+   84          | sentenciaSeleccion
+   85          | sentenciaIteracion
+   86          | sentenciaEtiquetada
+   87          | sentenciaSalto
+
+   88 sentenciaExpresion: expresion_s ';'
+
+   89 expresion_s: /* vacío */
+   90            | expresion
+
+   91 sentenciaCompuesta: '{' listaDeclaraciones_ listaSentencias_ '}'
+
+   92 listaDeDeclaraciones: declaracion
+   93                     | listaDeDeclaraciones declaracion
+
+   94 listaDeSentencias: sentencia
+   95                  | listaDeSentencias sentencia
+
+   96 sentenciaSeleccion: IF '(' expresion ')' sentencia
+   97                   | IF '(' expresion ')' sentencia ELSE sentencia
+   98                   | SWITCH '(' expresion ')' sentencia
+
+   99 sentenciaIteracion: WHILE '(' expresion ')' sentencia
+  100                   | DO sentencia WHILE '(' expresion ')' ';'
+  101                   | FOR '(' expresion_ ';' expresion_ ';' expresion_ ')' sentencia
+
+  102 sentenciaEtiquetada: CASE expresionConstante ':' sentencia
+  103                    | DEFAULT ':' sentencia
+
+  104 sentenciaSalto: CONTINUE ';'
+  105               | BREAK ';'
+  106               | RETURN expresion_ ';'
+
+  107 listaArgumentos_: /* vacío */
+  108                 | listaArgumentos
+
+  109 expresionConstante_: /* vacío */
+  110                    | expresionConstante
+
+  111 listaParametros_: /* vacío */
+  112                 | listaDeParametros
+
+  113 expresion_: /* vacío */
+  114           | expresion
+
+  115 listaDeclaraciones_: /* vacío */
+  116                    | listaDeDeclaraciones
+
+  117 listaSentencias_: /* vacío */
+  118                 | listaDeSentencias
+
+
+Terminales con las reglas donde aparecen
+
+$end (0) 0
+'\n' (10) 3 4 5
+'!' (33) 46
+'&' (38) 21 42
+'(' (40) 35 41 49 56 74 75 96 97 98 99 100 101
+')' (41) 35 41 49 56 74 75 96 97 98 99 100 101
+'*' (42) 31 43
+'+' (43) 28 44
+',' (44) 8 52 68 71 73 77
+'-' (45) 29 45
+':' (58) 13 102 103
+';' (59) 6 65 74 88 100 101 104 105 106
+'=' (61) 10 67
+'?' (63) 13
+'[' (91) 48 81
+']' (93) 48 81
+'{' (123) 70 71 91
+'}' (125) 70 71 91
+error (256) 5 6
+IDENTIFICADOR (258) 53 74 75 80
+TIPO_DATO (259) 35 41 65 74 75 78
+SIZEOF (260) 40 41
+CTE_DECIMAL (261) 58
+CTE_OCTAL (262) 59
+CTE_HEXADECIMAL (263) 60
+CTE_REAL (264) 61
+OP_O_LOGICO (265) 15
+OP_Y_LOGICO (266) 17
+OP_O_INCLUSIVO (267) 19
+OP_ASIGNACION (268) 11
+OP_IGUALDAD (269) 23
+OP_DESIGUALDAD (270) 24
+OP_RELACIONAL (271) 26
+OP_DIVISION (272) 32
+OP_PORCENTAJE (273) 33
+OP_INCREMENTO (274) 37 50
+OP_DECREMENTO (275) 38
+DO (276) 100
+WHILE (277) 99 100
+IF (278) 96 97
+ELSE (279) 97
+SWITCH (280) 98
+CASE (281) 102
+DEFAULT (282) 103
+BREAK (283) 105
+CONTINUE (284) 104
+FOR (285) 101
+RETURN (286) 106
+CTE_CADENA (287) 55
+CTE_CARACTER (288) 62
+
+
+No terminales con las reglas donde aparecen
+
+$accept (51)
+    en la izquierda: 0
+input (52)
+    en la izquierda: 1 2, en la derecha: 0 2
+line (53)
+    en la izquierda: 3 4 5 6, en la derecha: 2
+expresion (54)
+    en la izquierda: 7 8, en la derecha: 8 13 48 56 90 96 97 98 99
+    100 114
+expresionAsignacion (55)
+    en la izquierda: 9 10 11, en la derecha: 7 8 10 11 51 52 69
+expresionCondicional (56)
+    en la izquierda: 12 13, en la derecha: 9 13 57
+expresionOLogico (57)
+    en la izquierda: 14 15, en la derecha: 12 13 15
+expresionYLogico (58)
+    en la izquierda: 16 17, en la derecha: 14 15 17
+expresionOInclusivo (59)
+    en la izquierda: 18 19, en la derecha: 16 17 19
+expresionY (60)
+    en la izquierda: 20 21, en la derecha: 18 19 21
+expresionIgualdad (61)
+    en la izquierda: 22 23 24, en la derecha: 20 21 23 24
+expresionRelacional (62)
+    en la izquierda: 25 26, en la derecha: 22 23 24 26
+expresionAditiva (63)
+    en la izquierda: 27 28 29, en la derecha: 25 26 28 29
+expresionMultiplicativa (64)
+    en la izquierda: 30 31 32 33, en la derecha: 27 28 29 31 32 33
+expresionConversion (65)
+    en la izquierda: 34 35, en la derecha: 30 31 32 33 35 39
+expresionUnaria (66)
+    en la izquierda: 36 37 38 39 40 41, en la derecha: 10 11 34 37
+    38 40
+operadorUnario (67)
+    en la izquierda: 42 43 44 45 46, en la derecha: 39
+expresionSufijo (68)
+    en la izquierda: 47 48 49 50, en la derecha: 36 48 49 50
+listaArgumentos (69)
+    en la izquierda: 51 52, en la derecha: 52 108
+expresionPrimaria (70)
+    en la izquierda: 53 54 55 56, en la derecha: 47
+expresionConstante (71)
+    en la izquierda: 57, en la derecha: 102 110
+constante (72)
+    en la izquierda: 58 59 60 61 62, en la derecha: 54
+declaracion (73)
+    en la izquierda: 63 64, en la derecha: 3 92 93
+declaracionVariable (74)
+    en la izquierda: 65, en la derecha: 63
+declarador (75)
+    en la izquierda: 66 67 68, en la derecha: 65 68
+inicializador (76)
+    en la izquierda: 69 70 71, en la derecha: 67 72 73
+listaInicializadores (77)
+    en la izquierda: 72 73, en la derecha: 70 71 73
+declaracionFuncion (78)
+    en la izquierda: 74 75, en la derecha: 64
+listaDeParametros (79)
+    en la izquierda: 76 77, en la derecha: 77 112
+parametro (80)
+    en la izquierda: 78, en la derecha: 76 77
+unaDeclaracion (81)
+    en la izquierda: 79, en la derecha: 66 67 68 78
+declaradorDirecto (82)
+    en la izquierda: 80 81, en la derecha: 79 81
+sentencia (83)
+    en la izquierda: 82 83 84 85 86 87, en la derecha: 4 94 95 96 97
+    98 99 100 101 102 103
+sentenciaExpresion (84)
+    en la izquierda: 88, en la derecha: 82
+expresion_s (85)
+    en la izquierda: 89 90, en la derecha: 88
+sentenciaCompuesta (86)
+    en la izquierda: 91, en la derecha: 75 83
+listaDeDeclaraciones (87)
+    en la izquierda: 92 93, en la derecha: 93 116
+listaDeSentencias (88)
+    en la izquierda: 94 95, en la derecha: 95 118
+sentenciaSeleccion (89)
+    en la izquierda: 96 97 98, en la derecha: 84
+sentenciaIteracion (90)
+    en la izquierda: 99 100 101, en la derecha: 85
+sentenciaEtiquetada (91)
+    en la izquierda: 102 103, en la derecha: 86
+sentenciaSalto (92)
+    en la izquierda: 104 105 106, en la derecha: 87
+listaArgumentos_ (93)
+    en la izquierda: 107 108, en la derecha: 49
+expresionConstante_ (94)
+    en la izquierda: 109 110, en la derecha: 81
+listaParametros_ (95)
+    en la izquierda: 111 112, en la derecha: 74 75
+expresion_ (96)
+    en la izquierda: 113 114, en la derecha: 101 106
+listaDeclaraciones_ (97)
+    en la izquierda: 115 116, en la derecha: 91
+listaSentencias_ (98)
+    en la izquierda: 117 118, en la derecha: 91
+
+
+estado 0
+
+    0 $accept: . input $end
+
+    $default  reduce usando la regla 1 (input)
+
+    input  ir al estado 1
+
+
+estado 1
+
+    0 $accept: input . $end
+    2 input: input . line
+
+    $end             desplazar e ir al estado 2
+    error            desplazar e ir al estado 3
+    IDENTIFICADOR    desplazar e ir al estado 4
+    TIPO_DATO        desplazar e ir al estado 5
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    ';'  reduce usando la regla 89 (expresion_s)
+
+    line                     ir al estado 32
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    declaracion              ir al estado 50
+    declaracionVariable      ir al estado 51
+    declaracionFuncion       ir al estado 52
+    sentencia                ir al estado 53
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 2
+
+    0 $accept: input $end .
+
+    $default  aceptar
+
+
+estado 3
+
+    5 line: error . '\n'
+    6     | error . ';'
+
+    '\n'  desplazar e ir al estado 61
+    ';'   desplazar e ir al estado 62
+
+
+estado 4
+
+   53 expresionPrimaria: IDENTIFICADOR .
+
+    $default  reduce usando la regla 53 (expresionPrimaria)
+
+
+estado 5
+
+   65 declaracionVariable: TIPO_DATO . declarador ';'
+   74 declaracionFuncion: TIPO_DATO . IDENTIFICADOR '(' listaParametros_ ')' ';'
+   75                   | TIPO_DATO . IDENTIFICADOR '(' listaParametros_ ')' sentenciaCompuesta
+
+    IDENTIFICADOR  desplazar e ir al estado 63
+
+    declarador         ir al estado 64
+    unaDeclaracion     ir al estado 65
+    declaradorDirecto  ir al estado 66
+
+
+estado 6
+
+   40 expresionUnaria: SIZEOF . expresionUnaria
+   41                | SIZEOF . '(' TIPO_DATO ')'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 67
+    '!'              desplazar e ir al estado 30
+
+    expresionUnaria    ir al estado 68
+    operadorUnario     ir al estado 46
+    expresionSufijo    ir al estado 47
+    expresionPrimaria  ir al estado 48
+    constante          ir al estado 49
+
+
+estado 7
+
+   58 constante: CTE_DECIMAL .
+
+    $default  reduce usando la regla 58 (constante)
+
+
+estado 8
+
+   59 constante: CTE_OCTAL .
+
+    $default  reduce usando la regla 59 (constante)
+
+
+estado 9
+
+   60 constante: CTE_HEXADECIMAL .
+
+    $default  reduce usando la regla 60 (constante)
+
+
+estado 10
+
+   61 constante: CTE_REAL .
+
+    $default  reduce usando la regla 61 (constante)
+
+
+estado 11
+
+   37 expresionUnaria: OP_INCREMENTO . expresionUnaria
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 69
+    '!'              desplazar e ir al estado 30
+
+    expresionUnaria    ir al estado 70
+    operadorUnario     ir al estado 46
+    expresionSufijo    ir al estado 47
+    expresionPrimaria  ir al estado 48
+    constante          ir al estado 49
+
+
+estado 12
+
+   38 expresionUnaria: OP_DECREMENTO . expresionUnaria
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 69
+    '!'              desplazar e ir al estado 30
+
+    expresionUnaria    ir al estado 71
+    operadorUnario     ir al estado 46
+    expresionSufijo    ir al estado 47
+    expresionPrimaria  ir al estado 48
+    constante          ir al estado 49
+
+
+estado 13
+
+  100 sentenciaIteracion: DO . sentencia WHILE '(' expresion ')' ';'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 72
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 14
+
+   99 sentenciaIteracion: WHILE . '(' expresion ')' sentencia
+
+    '('  desplazar e ir al estado 73
+
+
+estado 15
+
+   96 sentenciaSeleccion: IF . '(' expresion ')' sentencia
+   97                   | IF . '(' expresion ')' sentencia ELSE sentencia
+
+    '('  desplazar e ir al estado 74
+
+
+estado 16
+
+   98 sentenciaSeleccion: SWITCH . '(' expresion ')' sentencia
+
+    '('  desplazar e ir al estado 75
+
+
+estado 17
+
+  102 sentenciaEtiquetada: CASE . expresionConstante ':' sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionCondicional     ir al estado 76
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    expresionConstante       ir al estado 78
+    constante                ir al estado 49
+
+
+estado 18
+
+  103 sentenciaEtiquetada: DEFAULT . ':' sentencia
+
+    ':'  desplazar e ir al estado 79
+
+
+estado 19
+
+  105 sentenciaSalto: BREAK . ';'
+
+    ';'  desplazar e ir al estado 80
+
+
+estado 20
+
+  104 sentenciaSalto: CONTINUE . ';'
+
+    ';'  desplazar e ir al estado 81
+
+
+estado 21
+
+  101 sentenciaIteracion: FOR . '(' expresion_ ';' expresion_ ';' expresion_ ')' sentencia
+
+    '('  desplazar e ir al estado 82
+
+
+estado 22
+
+  106 sentenciaSalto: RETURN . expresion_ ';'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    $default  reduce usando la regla 113 (expresion_)
+
+    expresion                ir al estado 83
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    expresion_               ir al estado 84
+
+
+estado 23
+
+   55 expresionPrimaria: CTE_CADENA .
+
+    $default  reduce usando la regla 55 (expresionPrimaria)
+
+
+estado 24
+
+   62 constante: CTE_CARACTER .
+
+    $default  reduce usando la regla 62 (constante)
+
+
+estado 25
+
+   42 operadorUnario: '&' .
+
+    $default  reduce usando la regla 42 (operadorUnario)
+
+
+estado 26
+
+   44 operadorUnario: '+' .
+
+    $default  reduce usando la regla 44 (operadorUnario)
+
+
+estado 27
+
+   45 operadorUnario: '-' .
+
+    $default  reduce usando la regla 45 (operadorUnario)
+
+
+estado 28
+
+   43 operadorUnario: '*' .
+
+    $default  reduce usando la regla 43 (operadorUnario)
+
+
+estado 29
+
+   35 expresionConversion: '(' . TIPO_DATO ')' expresionConversion
+   56 expresionPrimaria: '(' . expresion ')'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    TIPO_DATO        desplazar e ir al estado 85
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 86
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 30
+
+   46 operadorUnario: '!' .
+
+    $default  reduce usando la regla 46 (operadorUnario)
+
+
+estado 31
+
+   91 sentenciaCompuesta: '{' . listaDeclaraciones_ listaSentencias_ '}'
+
+    TIPO_DATO  desplazar e ir al estado 5
+
+    $default  reduce usando la regla 115 (listaDeclaraciones_)
+
+    declaracion           ir al estado 87
+    declaracionVariable   ir al estado 51
+    declaracionFuncion    ir al estado 52
+    listaDeDeclaraciones  ir al estado 88
+    listaDeclaraciones_   ir al estado 89
+
+
+estado 32
+
+    2 input: input line .
+
+    $default  reduce usando la regla 2 (input)
+
+
+estado 33
+
+    8 expresion: expresion . ',' expresionAsignacion
+   90 expresion_s: expresion .
+
+    ','  desplazar e ir al estado 90
+
+    $default  reduce usando la regla 90 (expresion_s)
+
+
+estado 34
+
+    7 expresion: expresionAsignacion .
+
+    $default  reduce usando la regla 7 (expresion)
+
+
+estado 35
+
+    9 expresionAsignacion: expresionCondicional .
+
+    $default  reduce usando la regla 9 (expresionAsignacion)
+
+
+estado 36
+
+   12 expresionCondicional: expresionOLogico .
+   13                     | expresionOLogico . '?' expresion ':' expresionCondicional
+   15 expresionOLogico: expresionOLogico . OP_O_LOGICO expresionYLogico
+
+    OP_O_LOGICO  desplazar e ir al estado 91
+    '?'          desplazar e ir al estado 92
+
+    $default  reduce usando la regla 12 (expresionCondicional)
+
+
+estado 37
+
+   14 expresionOLogico: expresionYLogico .
+   17 expresionYLogico: expresionYLogico . OP_Y_LOGICO expresionOInclusivo
+
+    OP_Y_LOGICO  desplazar e ir al estado 93
+
+    $default  reduce usando la regla 14 (expresionOLogico)
+
+
+estado 38
+
+   16 expresionYLogico: expresionOInclusivo .
+   19 expresionOInclusivo: expresionOInclusivo . OP_O_INCLUSIVO expresionY
+
+    OP_O_INCLUSIVO  desplazar e ir al estado 94
+
+    $default  reduce usando la regla 16 (expresionYLogico)
+
+
+estado 39
+
+   18 expresionOInclusivo: expresionY .
+   21 expresionY: expresionY . '&' expresionIgualdad
+
+    '&'  desplazar e ir al estado 95
+
+    $default  reduce usando la regla 18 (expresionOInclusivo)
+
+
+estado 40
+
+   20 expresionY: expresionIgualdad .
+   23 expresionIgualdad: expresionIgualdad . OP_IGUALDAD expresionRelacional
+   24                  | expresionIgualdad . OP_DESIGUALDAD expresionRelacional
+
+    OP_IGUALDAD     desplazar e ir al estado 96
+    OP_DESIGUALDAD  desplazar e ir al estado 97
+
+    $default  reduce usando la regla 20 (expresionY)
+
+
+estado 41
+
+   22 expresionIgualdad: expresionRelacional .
+   26 expresionRelacional: expresionRelacional . OP_RELACIONAL expresionAditiva
+
+    OP_RELACIONAL  desplazar e ir al estado 98
+
+    $default  reduce usando la regla 22 (expresionIgualdad)
+
+
+estado 42
+
+   25 expresionRelacional: expresionAditiva .
+   28 expresionAditiva: expresionAditiva . '+' expresionMultiplicativa
+   29                 | expresionAditiva . '-' expresionMultiplicativa
+
+    '+'  desplazar e ir al estado 99
+    '-'  desplazar e ir al estado 100
+
+    $default  reduce usando la regla 25 (expresionRelacional)
+
+
+estado 43
+
+   27 expresionAditiva: expresionMultiplicativa .
+   31 expresionMultiplicativa: expresionMultiplicativa . '*' expresionConversion
+   32                        | expresionMultiplicativa . OP_DIVISION expresionConversion
+   33                        | expresionMultiplicativa . OP_PORCENTAJE expresionConversion
+
+    OP_DIVISION    desplazar e ir al estado 101
+    OP_PORCENTAJE  desplazar e ir al estado 102
+    '*'            desplazar e ir al estado 103
+
+    $default  reduce usando la regla 27 (expresionAditiva)
+
+
+estado 44
+
+   30 expresionMultiplicativa: expresionConversion .
+
+    $default  reduce usando la regla 30 (expresionMultiplicativa)
+
+
+estado 45
+
+   10 expresionAsignacion: expresionUnaria . '=' expresionAsignacion
+   11                    | expresionUnaria . OP_ASIGNACION expresionAsignacion
+   34 expresionConversion: expresionUnaria .
+
+    OP_ASIGNACION  desplazar e ir al estado 104
+    '='            desplazar e ir al estado 105
+
+    $default  reduce usando la regla 34 (expresionConversion)
+
+
+estado 46
+
+   39 expresionUnaria: operadorUnario . expresionConversion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionConversion  ir al estado 106
+    expresionUnaria      ir al estado 77
+    operadorUnario       ir al estado 46
+    expresionSufijo      ir al estado 47
+    expresionPrimaria    ir al estado 48
+    constante            ir al estado 49
+
+
+estado 47
+
+   36 expresionUnaria: expresionSufijo .
+   48 expresionSufijo: expresionSufijo . '[' expresion ']'
+   49                | expresionSufijo . '(' listaArgumentos_ ')'
+   50                | expresionSufijo . OP_INCREMENTO
+
+    OP_INCREMENTO  desplazar e ir al estado 107
+    '('            desplazar e ir al estado 108
+    '['            desplazar e ir al estado 109
+
+    $default  reduce usando la regla 36 (expresionUnaria)
+
+
+estado 48
+
+   47 expresionSufijo: expresionPrimaria .
+
+    $default  reduce usando la regla 47 (expresionSufijo)
+
+
+estado 49
+
+   54 expresionPrimaria: constante .
+
+    $default  reduce usando la regla 54 (expresionPrimaria)
+
+
+estado 50
+
+    3 line: declaracion . '\n'
+
+    '\n'  desplazar e ir al estado 110
+
+
+estado 51
+
+   63 declaracion: declaracionVariable .
+
+    $default  reduce usando la regla 63 (declaracion)
+
+
+estado 52
+
+   64 declaracion: declaracionFuncion .
+
+    $default  reduce usando la regla 64 (declaracion)
+
+
+estado 53
+
+    4 line: sentencia . '\n'
+
+    '\n'  desplazar e ir al estado 111
+
+
+estado 54
+
+   82 sentencia: sentenciaExpresion .
+
+    $default  reduce usando la regla 82 (sentencia)
+
+
+estado 55
+
+   88 sentenciaExpresion: expresion_s . ';'
+
+    ';'  desplazar e ir al estado 112
+
+
+estado 56
+
+   83 sentencia: sentenciaCompuesta .
+
+    $default  reduce usando la regla 83 (sentencia)
+
+
+estado 57
+
+   84 sentencia: sentenciaSeleccion .
+
+    $default  reduce usando la regla 84 (sentencia)
+
+
+estado 58
+
+   85 sentencia: sentenciaIteracion .
+
+    $default  reduce usando la regla 85 (sentencia)
+
+
+estado 59
+
+   86 sentencia: sentenciaEtiquetada .
+
+    $default  reduce usando la regla 86 (sentencia)
+
+
+estado 60
+
+   87 sentencia: sentenciaSalto .
+
+    $default  reduce usando la regla 87 (sentencia)
+
+
+estado 61
+
+    5 line: error '\n' .
+
+    $default  reduce usando la regla 5 (line)
+
+
+estado 62
+
+    6 line: error ';' .
+
+    $default  reduce usando la regla 6 (line)
+
+
+estado 63
+
+   74 declaracionFuncion: TIPO_DATO IDENTIFICADOR . '(' listaParametros_ ')' ';'
+   75                   | TIPO_DATO IDENTIFICADOR . '(' listaParametros_ ')' sentenciaCompuesta
+   80 declaradorDirecto: IDENTIFICADOR .
+
+    '('  desplazar e ir al estado 113
+
+    $default  reduce usando la regla 80 (declaradorDirecto)
+
+
+estado 64
+
+   65 declaracionVariable: TIPO_DATO declarador . ';'
+
+    ';'  desplazar e ir al estado 114
+
+
+estado 65
+
+   66 declarador: unaDeclaracion .
+   67           | unaDeclaracion . '=' inicializador
+   68           | unaDeclaracion . ',' declarador
+
+    ','  desplazar e ir al estado 115
+    '='  desplazar e ir al estado 116
+
+    $default  reduce usando la regla 66 (declarador)
+
+
+estado 66
+
+   79 unaDeclaracion: declaradorDirecto .
+   81 declaradorDirecto: declaradorDirecto . '[' expresionConstante_ ']'
+
+    '['  desplazar e ir al estado 117
+
+    $default  reduce usando la regla 79 (unaDeclaracion)
+
+
+estado 67
+
+   41 expresionUnaria: SIZEOF '(' . TIPO_DATO ')'
+   56 expresionPrimaria: '(' . expresion ')'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    TIPO_DATO        desplazar e ir al estado 118
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 86
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 68
+
+   40 expresionUnaria: SIZEOF expresionUnaria .
+
+    $default  reduce usando la regla 40 (expresionUnaria)
+
+
+estado 69
+
+   56 expresionPrimaria: '(' . expresion ')'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 86
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 70
+
+   37 expresionUnaria: OP_INCREMENTO expresionUnaria .
+
+    $default  reduce usando la regla 37 (expresionUnaria)
+
+
+estado 71
+
+   38 expresionUnaria: OP_DECREMENTO expresionUnaria .
+
+    $default  reduce usando la regla 38 (expresionUnaria)
+
+
+estado 72
+
+  100 sentenciaIteracion: DO sentencia . WHILE '(' expresion ')' ';'
+
+    WHILE  desplazar e ir al estado 119
+
+
+estado 73
+
+   99 sentenciaIteracion: WHILE '(' . expresion ')' sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 120
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 74
+
+   96 sentenciaSeleccion: IF '(' . expresion ')' sentencia
+   97                   | IF '(' . expresion ')' sentencia ELSE sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 121
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 75
+
+   98 sentenciaSeleccion: SWITCH '(' . expresion ')' sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 122
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 76
+
+   57 expresionConstante: expresionCondicional .
+
+    $default  reduce usando la regla 57 (expresionConstante)
+
+
+estado 77
+
+   34 expresionConversion: expresionUnaria .
+
+    $default  reduce usando la regla 34 (expresionConversion)
+
+
+estado 78
+
+  102 sentenciaEtiquetada: CASE expresionConstante . ':' sentencia
+
+    ':'  desplazar e ir al estado 123
+
+
+estado 79
+
+  103 sentenciaEtiquetada: DEFAULT ':' . sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 124
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 80
+
+  105 sentenciaSalto: BREAK ';' .
+
+    $default  reduce usando la regla 105 (sentenciaSalto)
+
+
+estado 81
+
+  104 sentenciaSalto: CONTINUE ';' .
+
+    $default  reduce usando la regla 104 (sentenciaSalto)
+
+
+estado 82
+
+  101 sentenciaIteracion: FOR '(' . expresion_ ';' expresion_ ';' expresion_ ')' sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    $default  reduce usando la regla 113 (expresion_)
+
+    expresion                ir al estado 83
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    expresion_               ir al estado 125
+
+
+estado 83
+
+    8 expresion: expresion . ',' expresionAsignacion
+  114 expresion_: expresion .
+
+    ','  desplazar e ir al estado 90
+
+    $default  reduce usando la regla 114 (expresion_)
+
+
+estado 84
+
+  106 sentenciaSalto: RETURN expresion_ . ';'
+
+    ';'  desplazar e ir al estado 126
+
+
+estado 85
+
+   35 expresionConversion: '(' TIPO_DATO . ')' expresionConversion
+
+    ')'  desplazar e ir al estado 127
+
+
+estado 86
+
+    8 expresion: expresion . ',' expresionAsignacion
+   56 expresionPrimaria: '(' expresion . ')'
+
+    ','  desplazar e ir al estado 90
+    ')'  desplazar e ir al estado 128
+
+
+estado 87
+
+   92 listaDeDeclaraciones: declaracion .
+
+    $default  reduce usando la regla 92 (listaDeDeclaraciones)
+
+
+estado 88
+
+   93 listaDeDeclaraciones: listaDeDeclaraciones . declaracion
+  116 listaDeclaraciones_: listaDeDeclaraciones .
+
+    TIPO_DATO  desplazar e ir al estado 5
+
+    $default  reduce usando la regla 116 (listaDeclaraciones_)
+
+    declaracion          ir al estado 129
+    declaracionVariable  ir al estado 51
+    declaracionFuncion   ir al estado 52
+
+
+estado 89
+
+   91 sentenciaCompuesta: '{' listaDeclaraciones_ . listaSentencias_ '}'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    '}'       reduce usando la regla 117 (listaSentencias_)
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 130
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    listaDeSentencias        ir al estado 131
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+    listaSentencias_         ir al estado 132
+
+
+estado 90
+
+    8 expresion: expresion ',' . expresionAsignacion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionAsignacion      ir al estado 133
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 91
+
+   15 expresionOLogico: expresionOLogico OP_O_LOGICO . expresionYLogico
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionYLogico         ir al estado 134
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 92
+
+   13 expresionCondicional: expresionOLogico '?' . expresion ':' expresionCondicional
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 135
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 93
+
+   17 expresionYLogico: expresionYLogico OP_Y_LOGICO . expresionOInclusivo
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionOInclusivo      ir al estado 136
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 94
+
+   19 expresionOInclusivo: expresionOInclusivo OP_O_INCLUSIVO . expresionY
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionY               ir al estado 137
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 95
+
+   21 expresionY: expresionY '&' . expresionIgualdad
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionIgualdad        ir al estado 138
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 96
+
+   23 expresionIgualdad: expresionIgualdad OP_IGUALDAD . expresionRelacional
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionRelacional      ir al estado 139
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 97
+
+   24 expresionIgualdad: expresionIgualdad OP_DESIGUALDAD . expresionRelacional
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionRelacional      ir al estado 140
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 98
+
+   26 expresionRelacional: expresionRelacional OP_RELACIONAL . expresionAditiva
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionAditiva         ir al estado 141
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 99
+
+   28 expresionAditiva: expresionAditiva '+' . expresionMultiplicativa
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionMultiplicativa  ir al estado 142
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 100
+
+   29 expresionAditiva: expresionAditiva '-' . expresionMultiplicativa
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionMultiplicativa  ir al estado 143
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 101
+
+   32 expresionMultiplicativa: expresionMultiplicativa OP_DIVISION . expresionConversion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionConversion  ir al estado 144
+    expresionUnaria      ir al estado 77
+    operadorUnario       ir al estado 46
+    expresionSufijo      ir al estado 47
+    expresionPrimaria    ir al estado 48
+    constante            ir al estado 49
+
+
+estado 102
+
+   33 expresionMultiplicativa: expresionMultiplicativa OP_PORCENTAJE . expresionConversion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionConversion  ir al estado 145
+    expresionUnaria      ir al estado 77
+    operadorUnario       ir al estado 46
+    expresionSufijo      ir al estado 47
+    expresionPrimaria    ir al estado 48
+    constante            ir al estado 49
+
+
+estado 103
+
+   31 expresionMultiplicativa: expresionMultiplicativa '*' . expresionConversion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionConversion  ir al estado 146
+    expresionUnaria      ir al estado 77
+    operadorUnario       ir al estado 46
+    expresionSufijo      ir al estado 47
+    expresionPrimaria    ir al estado 48
+    constante            ir al estado 49
+
+
+estado 104
+
+   11 expresionAsignacion: expresionUnaria OP_ASIGNACION . expresionAsignacion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionAsignacion      ir al estado 147
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 105
+
+   10 expresionAsignacion: expresionUnaria '=' . expresionAsignacion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionAsignacion      ir al estado 148
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 106
+
+   39 expresionUnaria: operadorUnario expresionConversion .
+
+    $default  reduce usando la regla 39 (expresionUnaria)
+
+
+estado 107
+
+   50 expresionSufijo: expresionSufijo OP_INCREMENTO .
+
+    $default  reduce usando la regla 50 (expresionSufijo)
+
+
+estado 108
+
+   49 expresionSufijo: expresionSufijo '(' . listaArgumentos_ ')'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    $default  reduce usando la regla 107 (listaArgumentos_)
+
+    expresionAsignacion      ir al estado 149
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    listaArgumentos          ir al estado 150
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    listaArgumentos_         ir al estado 151
+
+
+estado 109
+
+   48 expresionSufijo: expresionSufijo '[' . expresion ']'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 152
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 110
+
+    3 line: declaracion '\n' .
+
+    $default  reduce usando la regla 3 (line)
+
+
+estado 111
+
+    4 line: sentencia '\n' .
+
+    $default  reduce usando la regla 4 (line)
+
+
+estado 112
+
+   88 sentenciaExpresion: expresion_s ';' .
+
+    $default  reduce usando la regla 88 (sentenciaExpresion)
+
+
+estado 113
+
+   74 declaracionFuncion: TIPO_DATO IDENTIFICADOR '(' . listaParametros_ ')' ';'
+   75                   | TIPO_DATO IDENTIFICADOR '(' . listaParametros_ ')' sentenciaCompuesta
+
+    TIPO_DATO  desplazar e ir al estado 153
+
+    $default  reduce usando la regla 111 (listaParametros_)
+
+    listaDeParametros  ir al estado 154
+    parametro          ir al estado 155
+    listaParametros_   ir al estado 156
+
+
+estado 114
+
+   65 declaracionVariable: TIPO_DATO declarador ';' .
+
+    $default  reduce usando la regla 65 (declaracionVariable)
+
+
+estado 115
+
+   68 declarador: unaDeclaracion ',' . declarador
+
+    IDENTIFICADOR  desplazar e ir al estado 157
+
+    declarador         ir al estado 158
+    unaDeclaracion     ir al estado 65
+    declaradorDirecto  ir al estado 66
+
+
+estado 116
+
+   67 declarador: unaDeclaracion '=' . inicializador
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 159
+
+    expresionAsignacion      ir al estado 160
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    inicializador            ir al estado 161
+
+
+estado 117
+
+   81 declaradorDirecto: declaradorDirecto '[' . expresionConstante_ ']'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    $default  reduce usando la regla 109 (expresionConstante_)
+
+    expresionCondicional     ir al estado 76
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    expresionConstante       ir al estado 162
+    constante                ir al estado 49
+    expresionConstante_      ir al estado 163
+
+
+estado 118
+
+   41 expresionUnaria: SIZEOF '(' TIPO_DATO . ')'
+
+    ')'  desplazar e ir al estado 164
+
+
+estado 119
+
+  100 sentenciaIteracion: DO sentencia WHILE . '(' expresion ')' ';'
+
+    '('  desplazar e ir al estado 165
+
+
+estado 120
+
+    8 expresion: expresion . ',' expresionAsignacion
+   99 sentenciaIteracion: WHILE '(' expresion . ')' sentencia
+
+    ','  desplazar e ir al estado 90
+    ')'  desplazar e ir al estado 166
+
+
+estado 121
+
+    8 expresion: expresion . ',' expresionAsignacion
+   96 sentenciaSeleccion: IF '(' expresion . ')' sentencia
+   97                   | IF '(' expresion . ')' sentencia ELSE sentencia
+
+    ','  desplazar e ir al estado 90
+    ')'  desplazar e ir al estado 167
+
+
+estado 122
+
+    8 expresion: expresion . ',' expresionAsignacion
+   98 sentenciaSeleccion: SWITCH '(' expresion . ')' sentencia
+
+    ','  desplazar e ir al estado 90
+    ')'  desplazar e ir al estado 168
+
+
+estado 123
+
+  102 sentenciaEtiquetada: CASE expresionConstante ':' . sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 169
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 124
+
+  103 sentenciaEtiquetada: DEFAULT ':' sentencia .
+
+    $default  reduce usando la regla 103 (sentenciaEtiquetada)
+
+
+estado 125
+
+  101 sentenciaIteracion: FOR '(' expresion_ . ';' expresion_ ';' expresion_ ')' sentencia
+
+    ';'  desplazar e ir al estado 170
+
+
+estado 126
+
+  106 sentenciaSalto: RETURN expresion_ ';' .
+
+    $default  reduce usando la regla 106 (sentenciaSalto)
+
+
+estado 127
+
+   35 expresionConversion: '(' TIPO_DATO ')' . expresionConversion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionConversion  ir al estado 171
+    expresionUnaria      ir al estado 77
+    operadorUnario       ir al estado 46
+    expresionSufijo      ir al estado 47
+    expresionPrimaria    ir al estado 48
+    constante            ir al estado 49
+
+
+estado 128
+
+   56 expresionPrimaria: '(' expresion ')' .
+
+    $default  reduce usando la regla 56 (expresionPrimaria)
+
+
+estado 129
+
+   93 listaDeDeclaraciones: listaDeDeclaraciones declaracion .
+
+    $default  reduce usando la regla 93 (listaDeDeclaraciones)
+
+
+estado 130
+
+   94 listaDeSentencias: sentencia .
+
+    $default  reduce usando la regla 94 (listaDeSentencias)
+
+
+estado 131
+
+   95 listaDeSentencias: listaDeSentencias . sentencia
+  118 listaSentencias_: listaDeSentencias .
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    '}'       reduce usando la regla 118 (listaSentencias_)
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 172
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 132
+
+   91 sentenciaCompuesta: '{' listaDeclaraciones_ listaSentencias_ . '}'
+
+    '}'  desplazar e ir al estado 173
+
+
+estado 133
+
+    8 expresion: expresion ',' expresionAsignacion .
+
+    $default  reduce usando la regla 8 (expresion)
+
+
+estado 134
+
+   15 expresionOLogico: expresionOLogico OP_O_LOGICO expresionYLogico .
+   17 expresionYLogico: expresionYLogico . OP_Y_LOGICO expresionOInclusivo
+
+    OP_Y_LOGICO  desplazar e ir al estado 93
+
+    $default  reduce usando la regla 15 (expresionOLogico)
+
+
+estado 135
+
+    8 expresion: expresion . ',' expresionAsignacion
+   13 expresionCondicional: expresionOLogico '?' expresion . ':' expresionCondicional
+
+    ','  desplazar e ir al estado 90
+    ':'  desplazar e ir al estado 174
+
+
+estado 136
+
+   17 expresionYLogico: expresionYLogico OP_Y_LOGICO expresionOInclusivo .
+   19 expresionOInclusivo: expresionOInclusivo . OP_O_INCLUSIVO expresionY
+
+    OP_O_INCLUSIVO  desplazar e ir al estado 94
+
+    $default  reduce usando la regla 17 (expresionYLogico)
+
+
+estado 137
+
+   19 expresionOInclusivo: expresionOInclusivo OP_O_INCLUSIVO expresionY .
+   21 expresionY: expresionY . '&' expresionIgualdad
+
+    '&'  desplazar e ir al estado 95
+
+    $default  reduce usando la regla 19 (expresionOInclusivo)
+
+
+estado 138
+
+   21 expresionY: expresionY '&' expresionIgualdad .
+   23 expresionIgualdad: expresionIgualdad . OP_IGUALDAD expresionRelacional
+   24                  | expresionIgualdad . OP_DESIGUALDAD expresionRelacional
+
+    OP_IGUALDAD     desplazar e ir al estado 96
+    OP_DESIGUALDAD  desplazar e ir al estado 97
+
+    $default  reduce usando la regla 21 (expresionY)
+
+
+estado 139
+
+   23 expresionIgualdad: expresionIgualdad OP_IGUALDAD expresionRelacional .
+   26 expresionRelacional: expresionRelacional . OP_RELACIONAL expresionAditiva
+
+    OP_RELACIONAL  desplazar e ir al estado 98
+
+    $default  reduce usando la regla 23 (expresionIgualdad)
+
+
+estado 140
+
+   24 expresionIgualdad: expresionIgualdad OP_DESIGUALDAD expresionRelacional .
+   26 expresionRelacional: expresionRelacional . OP_RELACIONAL expresionAditiva
+
+    OP_RELACIONAL  desplazar e ir al estado 98
+
+    $default  reduce usando la regla 24 (expresionIgualdad)
+
+
+estado 141
+
+   26 expresionRelacional: expresionRelacional OP_RELACIONAL expresionAditiva .
+   28 expresionAditiva: expresionAditiva . '+' expresionMultiplicativa
+   29                 | expresionAditiva . '-' expresionMultiplicativa
+
+    '+'  desplazar e ir al estado 99
+    '-'  desplazar e ir al estado 100
+
+    $default  reduce usando la regla 26 (expresionRelacional)
+
+
+estado 142
+
+   28 expresionAditiva: expresionAditiva '+' expresionMultiplicativa .
+   31 expresionMultiplicativa: expresionMultiplicativa . '*' expresionConversion
+   32                        | expresionMultiplicativa . OP_DIVISION expresionConversion
+   33                        | expresionMultiplicativa . OP_PORCENTAJE expresionConversion
+
+    OP_DIVISION    desplazar e ir al estado 101
+    OP_PORCENTAJE  desplazar e ir al estado 102
+    '*'            desplazar e ir al estado 103
+
+    $default  reduce usando la regla 28 (expresionAditiva)
+
+
+estado 143
+
+   29 expresionAditiva: expresionAditiva '-' expresionMultiplicativa .
+   31 expresionMultiplicativa: expresionMultiplicativa . '*' expresionConversion
+   32                        | expresionMultiplicativa . OP_DIVISION expresionConversion
+   33                        | expresionMultiplicativa . OP_PORCENTAJE expresionConversion
+
+    OP_DIVISION    desplazar e ir al estado 101
+    OP_PORCENTAJE  desplazar e ir al estado 102
+    '*'            desplazar e ir al estado 103
+
+    $default  reduce usando la regla 29 (expresionAditiva)
+
+
+estado 144
+
+   32 expresionMultiplicativa: expresionMultiplicativa OP_DIVISION expresionConversion .
+
+    $default  reduce usando la regla 32 (expresionMultiplicativa)
+
+
+estado 145
+
+   33 expresionMultiplicativa: expresionMultiplicativa OP_PORCENTAJE expresionConversion .
+
+    $default  reduce usando la regla 33 (expresionMultiplicativa)
+
+
+estado 146
+
+   31 expresionMultiplicativa: expresionMultiplicativa '*' expresionConversion .
+
+    $default  reduce usando la regla 31 (expresionMultiplicativa)
+
+
+estado 147
+
+   11 expresionAsignacion: expresionUnaria OP_ASIGNACION expresionAsignacion .
+
+    $default  reduce usando la regla 11 (expresionAsignacion)
+
+
+estado 148
+
+   10 expresionAsignacion: expresionUnaria '=' expresionAsignacion .
+
+    $default  reduce usando la regla 10 (expresionAsignacion)
+
+
+estado 149
+
+   51 listaArgumentos: expresionAsignacion .
+
+    $default  reduce usando la regla 51 (listaArgumentos)
+
+
+estado 150
+
+   52 listaArgumentos: listaArgumentos . ',' expresionAsignacion
+  108 listaArgumentos_: listaArgumentos .
+
+    ','  desplazar e ir al estado 175
+
+    $default  reduce usando la regla 108 (listaArgumentos_)
+
+
+estado 151
+
+   49 expresionSufijo: expresionSufijo '(' listaArgumentos_ . ')'
+
+    ')'  desplazar e ir al estado 176
+
+
+estado 152
+
+    8 expresion: expresion . ',' expresionAsignacion
+   48 expresionSufijo: expresionSufijo '[' expresion . ']'
+
+    ','  desplazar e ir al estado 90
+    ']'  desplazar e ir al estado 177
+
+
+estado 153
+
+   78 parametro: TIPO_DATO . unaDeclaracion
+
+    IDENTIFICADOR  desplazar e ir al estado 157
+
+    unaDeclaracion     ir al estado 178
+    declaradorDirecto  ir al estado 66
+
+
+estado 154
+
+   77 listaDeParametros: listaDeParametros . ',' parametro
+  112 listaParametros_: listaDeParametros .
+
+    ','  desplazar e ir al estado 179
+
+    $default  reduce usando la regla 112 (listaParametros_)
+
+
+estado 155
+
+   76 listaDeParametros: parametro .
+
+    $default  reduce usando la regla 76 (listaDeParametros)
+
+
+estado 156
+
+   74 declaracionFuncion: TIPO_DATO IDENTIFICADOR '(' listaParametros_ . ')' ';'
+   75                   | TIPO_DATO IDENTIFICADOR '(' listaParametros_ . ')' sentenciaCompuesta
+
+    ')'  desplazar e ir al estado 180
+
+
+estado 157
+
+   80 declaradorDirecto: IDENTIFICADOR .
+
+    $default  reduce usando la regla 80 (declaradorDirecto)
+
+
+estado 158
+
+   68 declarador: unaDeclaracion ',' declarador .
+
+    $default  reduce usando la regla 68 (declarador)
+
+
+estado 159
+
+   70 inicializador: '{' . listaInicializadores '}'
+   71              | '{' . listaInicializadores ',' listaInicializadores '}'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 159
+
+    expresionAsignacion      ir al estado 160
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    inicializador            ir al estado 181
+    listaInicializadores     ir al estado 182
+
+
+estado 160
+
+   69 inicializador: expresionAsignacion .
+
+    $default  reduce usando la regla 69 (inicializador)
+
+
+estado 161
+
+   67 declarador: unaDeclaracion '=' inicializador .
+
+    $default  reduce usando la regla 67 (declarador)
+
+
+estado 162
+
+  110 expresionConstante_: expresionConstante .
+
+    $default  reduce usando la regla 110 (expresionConstante_)
+
+
+estado 163
+
+   81 declaradorDirecto: declaradorDirecto '[' expresionConstante_ . ']'
+
+    ']'  desplazar e ir al estado 183
+
+
+estado 164
+
+   41 expresionUnaria: SIZEOF '(' TIPO_DATO ')' .
+
+    $default  reduce usando la regla 41 (expresionUnaria)
+
+
+estado 165
+
+  100 sentenciaIteracion: DO sentencia WHILE '(' . expresion ')' ';'
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresion                ir al estado 184
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 166
+
+   99 sentenciaIteracion: WHILE '(' expresion ')' . sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 185
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 167
+
+   96 sentenciaSeleccion: IF '(' expresion ')' . sentencia
+   97                   | IF '(' expresion ')' . sentencia ELSE sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 186
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 168
+
+   98 sentenciaSeleccion: SWITCH '(' expresion ')' . sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 187
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 169
+
+  102 sentenciaEtiquetada: CASE expresionConstante ':' sentencia .
+
+    $default  reduce usando la regla 102 (sentenciaEtiquetada)
+
+
+estado 170
+
+  101 sentenciaIteracion: FOR '(' expresion_ ';' . expresion_ ';' expresion_ ')' sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    $default  reduce usando la regla 113 (expresion_)
+
+    expresion                ir al estado 83
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    expresion_               ir al estado 188
+
+
+estado 171
+
+   35 expresionConversion: '(' TIPO_DATO ')' expresionConversion .
+
+    $default  reduce usando la regla 35 (expresionConversion)
+
+
+estado 172
+
+   95 listaDeSentencias: listaDeSentencias sentencia .
+
+    $default  reduce usando la regla 95 (listaDeSentencias)
+
+
+estado 173
+
+   91 sentenciaCompuesta: '{' listaDeclaraciones_ listaSentencias_ '}' .
+
+    $default  reduce usando la regla 91 (sentenciaCompuesta)
+
+
+estado 174
+
+   13 expresionCondicional: expresionOLogico '?' expresion ':' . expresionCondicional
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionCondicional     ir al estado 189
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 77
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 175
+
+   52 listaArgumentos: listaArgumentos ',' . expresionAsignacion
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    expresionAsignacion      ir al estado 190
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+
+
+estado 176
+
+   49 expresionSufijo: expresionSufijo '(' listaArgumentos_ ')' .
+
+    $default  reduce usando la regla 49 (expresionSufijo)
+
+
+estado 177
+
+   48 expresionSufijo: expresionSufijo '[' expresion ']' .
+
+    $default  reduce usando la regla 48 (expresionSufijo)
+
+
+estado 178
+
+   78 parametro: TIPO_DATO unaDeclaracion .
+
+    $default  reduce usando la regla 78 (parametro)
+
+
+estado 179
+
+   77 listaDeParametros: listaDeParametros ',' . parametro
+
+    TIPO_DATO  desplazar e ir al estado 153
+
+    parametro  ir al estado 191
+
+
+estado 180
+
+   74 declaracionFuncion: TIPO_DATO IDENTIFICADOR '(' listaParametros_ ')' . ';'
+   75                   | TIPO_DATO IDENTIFICADOR '(' listaParametros_ ')' . sentenciaCompuesta
+
+    ';'  desplazar e ir al estado 192
+    '{'  desplazar e ir al estado 31
+
+    sentenciaCompuesta  ir al estado 193
+
+
+estado 181
+
+   72 listaInicializadores: inicializador .
+
+    $default  reduce usando la regla 72 (listaInicializadores)
+
+
+estado 182
+
+   70 inicializador: '{' listaInicializadores . '}'
+   71              | '{' listaInicializadores . ',' listaInicializadores '}'
+   73 listaInicializadores: listaInicializadores . ',' inicializador
+
+    ','  desplazar e ir al estado 194
+    '}'  desplazar e ir al estado 195
+
+
+estado 183
+
+   81 declaradorDirecto: declaradorDirecto '[' expresionConstante_ ']' .
+
+    $default  reduce usando la regla 81 (declaradorDirecto)
+
+
+estado 184
+
+    8 expresion: expresion . ',' expresionAsignacion
+  100 sentenciaIteracion: DO sentencia WHILE '(' expresion . ')' ';'
+
+    ','  desplazar e ir al estado 90
+    ')'  desplazar e ir al estado 196
+
+
+estado 185
+
+   99 sentenciaIteracion: WHILE '(' expresion ')' sentencia .
+
+    $default  reduce usando la regla 99 (sentenciaIteracion)
+
+
+estado 186
+
+   96 sentenciaSeleccion: IF '(' expresion ')' sentencia .
+   97                   | IF '(' expresion ')' sentencia . ELSE sentencia
+
+    ELSE  desplazar e ir al estado 197
+
+    ELSE      [reduce usando la regla 96 (sentenciaSeleccion)]
+    $default  reduce usando la regla 96 (sentenciaSeleccion)
+
+
+estado 187
+
+   98 sentenciaSeleccion: SWITCH '(' expresion ')' sentencia .
+
+    $default  reduce usando la regla 98 (sentenciaSeleccion)
+
+
+estado 188
+
+  101 sentenciaIteracion: FOR '(' expresion_ ';' expresion_ . ';' expresion_ ')' sentencia
+
+    ';'  desplazar e ir al estado 198
+
+
+estado 189
+
+   13 expresionCondicional: expresionOLogico '?' expresion ':' expresionCondicional .
+
+    $default  reduce usando la regla 13 (expresionCondicional)
+
+
+estado 190
+
+   52 listaArgumentos: listaArgumentos ',' expresionAsignacion .
+
+    $default  reduce usando la regla 52 (listaArgumentos)
+
+
+estado 191
+
+   77 listaDeParametros: listaDeParametros ',' parametro .
+
+    $default  reduce usando la regla 77 (listaDeParametros)
+
+
+estado 192
+
+   74 declaracionFuncion: TIPO_DATO IDENTIFICADOR '(' listaParametros_ ')' ';' .
+
+    $default  reduce usando la regla 74 (declaracionFuncion)
+
+
+estado 193
+
+   75 declaracionFuncion: TIPO_DATO IDENTIFICADOR '(' listaParametros_ ')' sentenciaCompuesta .
+
+    $default  reduce usando la regla 75 (declaracionFuncion)
+
+
+estado 194
+
+   71 inicializador: '{' listaInicializadores ',' . listaInicializadores '}'
+   73 listaInicializadores: listaInicializadores ',' . inicializador
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 159
+
+    expresionAsignacion      ir al estado 160
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    inicializador            ir al estado 199
+    listaInicializadores     ir al estado 200
+
+
+estado 195
+
+   70 inicializador: '{' listaInicializadores '}' .
+
+    $default  reduce usando la regla 70 (inicializador)
+
+
+estado 196
+
+  100 sentenciaIteracion: DO sentencia WHILE '(' expresion ')' . ';'
+
+    ';'  desplazar e ir al estado 201
+
+
+estado 197
+
+   97 sentenciaSeleccion: IF '(' expresion ')' sentencia ELSE . sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 202
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 198
+
+  101 sentenciaIteracion: FOR '(' expresion_ ';' expresion_ ';' . expresion_ ')' sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+
+    $default  reduce usando la regla 113 (expresion_)
+
+    expresion                ir al estado 83
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    expresion_               ir al estado 203
+
+
+estado 199
+
+   72 listaInicializadores: inicializador .
+   73                     | listaInicializadores ',' inicializador .
+
+    ','       reduce usando la regla 72 (listaInicializadores)
+    ','       [reduce usando la regla 73 (listaInicializadores)]
+    '}'       reduce usando la regla 72 (listaInicializadores)
+    '}'       [reduce usando la regla 73 (listaInicializadores)]
+    $default  reduce usando la regla 72 (listaInicializadores)
+
+
+estado 200
+
+   71 inicializador: '{' listaInicializadores ',' listaInicializadores . '}'
+   73 listaInicializadores: listaInicializadores . ',' inicializador
+
+    ','  desplazar e ir al estado 204
+    '}'  desplazar e ir al estado 205
+
+
+estado 201
+
+  100 sentenciaIteracion: DO sentencia WHILE '(' expresion ')' ';' .
+
+    $default  reduce usando la regla 100 (sentenciaIteracion)
+
+
+estado 202
+
+   97 sentenciaSeleccion: IF '(' expresion ')' sentencia ELSE sentencia .
+
+    $default  reduce usando la regla 97 (sentenciaSeleccion)
+
+
+estado 203
+
+  101 sentenciaIteracion: FOR '(' expresion_ ';' expresion_ ';' expresion_ . ')' sentencia
+
+    ')'  desplazar e ir al estado 206
+
+
+estado 204
+
+   73 listaInicializadores: listaInicializadores ',' . inicializador
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 159
+
+    expresionAsignacion      ir al estado 160
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    inicializador            ir al estado 207
+
+
+estado 205
+
+   71 inicializador: '{' listaInicializadores ',' listaInicializadores '}' .
+
+    $default  reduce usando la regla 71 (inicializador)
+
+
+estado 206
+
+  101 sentenciaIteracion: FOR '(' expresion_ ';' expresion_ ';' expresion_ ')' . sentencia
+
+    IDENTIFICADOR    desplazar e ir al estado 4
+    SIZEOF           desplazar e ir al estado 6
+    CTE_DECIMAL      desplazar e ir al estado 7
+    CTE_OCTAL        desplazar e ir al estado 8
+    CTE_HEXADECIMAL  desplazar e ir al estado 9
+    CTE_REAL         desplazar e ir al estado 10
+    OP_INCREMENTO    desplazar e ir al estado 11
+    OP_DECREMENTO    desplazar e ir al estado 12
+    DO               desplazar e ir al estado 13
+    WHILE            desplazar e ir al estado 14
+    IF               desplazar e ir al estado 15
+    SWITCH           desplazar e ir al estado 16
+    CASE             desplazar e ir al estado 17
+    DEFAULT          desplazar e ir al estado 18
+    BREAK            desplazar e ir al estado 19
+    CONTINUE         desplazar e ir al estado 20
+    FOR              desplazar e ir al estado 21
+    RETURN           desplazar e ir al estado 22
+    CTE_CADENA       desplazar e ir al estado 23
+    CTE_CARACTER     desplazar e ir al estado 24
+    '&'              desplazar e ir al estado 25
+    '+'              desplazar e ir al estado 26
+    '-'              desplazar e ir al estado 27
+    '*'              desplazar e ir al estado 28
+    '('              desplazar e ir al estado 29
+    '!'              desplazar e ir al estado 30
+    '{'              desplazar e ir al estado 31
+
+    $default  reduce usando la regla 89 (expresion_s)
+
+    expresion                ir al estado 33
+    expresionAsignacion      ir al estado 34
+    expresionCondicional     ir al estado 35
+    expresionOLogico         ir al estado 36
+    expresionYLogico         ir al estado 37
+    expresionOInclusivo      ir al estado 38
+    expresionY               ir al estado 39
+    expresionIgualdad        ir al estado 40
+    expresionRelacional      ir al estado 41
+    expresionAditiva         ir al estado 42
+    expresionMultiplicativa  ir al estado 43
+    expresionConversion      ir al estado 44
+    expresionUnaria          ir al estado 45
+    operadorUnario           ir al estado 46
+    expresionSufijo          ir al estado 47
+    expresionPrimaria        ir al estado 48
+    constante                ir al estado 49
+    sentencia                ir al estado 208
+    sentenciaExpresion       ir al estado 54
+    expresion_s              ir al estado 55
+    sentenciaCompuesta       ir al estado 56
+    sentenciaSeleccion       ir al estado 57
+    sentenciaIteracion       ir al estado 58
+    sentenciaEtiquetada      ir al estado 59
+    sentenciaSalto           ir al estado 60
+
+
+estado 207
+
+   73 listaInicializadores: listaInicializadores ',' inicializador .
+
+    $default  reduce usando la regla 73 (listaInicializadores)
+
+
+estado 208
+
+  101 sentenciaIteracion: FOR '(' expresion_ ';' expresion_ ';' expresion_ ')' sentencia .
+
+    $default  reduce usando la regla 101 (sentenciaIteracion)
